@@ -92,7 +92,7 @@ def print_ip_details(ip_data, vt_data, ipdb_data):
     vt_score = vt_score_calc(vt_data)
     ipdb_score = ipdb_data["data"]["abuseConfidenceScore"]
     ipdb_country_code = ipdb_data["data"]["countryCode"]
-    print(f"{ip:<20}{ip_country:<20}{as_country_code:<10}{vt_country:<10}{ipdb_country_code:<10}{asn:<20}{aso:<30}{vt_reputation:<15}{vt_score:<15}{ipdb_score:<15}{vt_link}")
+    print(f"{ip:<20}{ip_country:<20}{as_country_code:<10}{vt_country:<10}{ipdb_country_code:<10}{asn:<15}{aso:<30}{vt_reputation:<10}{vt_score:<10}{ipdb_score:<15}{vt_link}")
 
 def process_list(ip_list):
     with open(ip_list, 'r', encoding='UTF-8') as file:
@@ -106,10 +106,10 @@ def process_list(ip_list):
         print(internal)
 
 if ip:
-    print(f"{'IP':<20}{'Country':<20}{'IP_Code':<10}{'VT_Code':<10}{'IPDB_Code':<10}{'ASN':<20}{'ASO':<30}{'VT_Rep':<15}{'VT_Score':<15}{'AIPDB_Score':<15}{'VT_Link'}")
+    print(f"{'IP':<20}{'Country':<20}{'IP_Code':<10}{'VT_Code':<10}{'IPDB_Code':<10}{'ASN':<15}{'ASO':<30}{'VT_Rep':<10}{'VT_Score':<10}{'AIPDB_Score':<15}{'VT_Link'}")
     print_ip_details(get_ip_info(ip), get_vt_info(ip), get_ipdb_info(ip, 90))
 elif ip_list:
-    print(f"{'IP':<20}{'Country':<20}{'IP_Code':<10}{'VT_Code':<10}{'IPDB_Code':<10}{'ASN':<20}{'ASO':<30}{'VT_Rep':<15}{'VT_Score':<15}{'AIPDB_Score':<15}{'VT_Link'}")
+    print(f"{'IP':<20}{'Country':<20}{'IP_Code':<10}{'VT_Code':<10}{'IPDB_Code':<10}{'ASN':<15}{'ASO':<30}{'VT_Rep':<10}{'VT_Score':<10}{'AIPDB_Score':<15}{'VT_Link'}")
     process_list(ip_list)
 else:
     print(f"Please provide a valid argument, --help for help.")
