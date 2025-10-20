@@ -86,7 +86,11 @@ def print_ip_details(ip_data, vt_data, ipdb_data):
     as_country_code = ip_data["country_code"]
     vt_link = vt_data["data"]["links"]["self"]
     vt_reputation = vt_data["data"]["attributes"]["reputation"]
-    vt_country = vt_data["data"]["attributes"]["country"]
+    vt_country = ""
+    try:
+        vt_country = vt_data["data"]["attributes"]["country"]
+    except KeyError:
+        vt_country = "--"
     vt_asn = vt_data["data"]["attributes"]["asn"]
     vt_aso = vt_data["data"]["attributes"]["as_owner"]
     vt_score = vt_score_calc(vt_data)
