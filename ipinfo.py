@@ -84,7 +84,8 @@ def print_ip_details(ip_data, vt_data, ipdb_data):
     as_domain = ip_data["as_domain"]
     ip_country = ip_data["country"]
     as_country_code = ip_data["country_code"]
-    vt_link = vt_data["data"]["links"]["self"]
+    #vt_link = vt_data["data"]["links"]["self"]
+    vt_link = f"https://www.virustotal.com/gui/ip-address/{ip}"
     vt_reputation = vt_data["data"]["attributes"]["reputation"]
     vt_country = ""
     try:
