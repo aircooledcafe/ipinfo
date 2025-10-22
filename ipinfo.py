@@ -19,8 +19,6 @@ args = parser.parse_args()
 
 load_dotenv()
 
-mal_ip="144.31.221.84"
-
 ip_api_key = os.getenv('IPINFO_API_KEY')
 vt_api_key = os.getenv('VIRUSTOTAL_API_KEY')
 ipdb_api_key = os.getenv('ABUSEIPDB_API_KEY')
@@ -28,12 +26,10 @@ ipinfo_base_url = "https://api.ipinfo.io/lite/"
 vt_base_url = "https://www.virustotal.com/api/v3/ip_addresses/"
 ipdb_base_url = "https://api.abuseipdb.com/api/v2/check"
 
+# Load args into variables
 ip = args.ipaddress
-#print(ip)
 ip_list = args.list
-#print(ip_list)
 output_file = args.file
-#print(output_file)
 
 # Get IP detail from IPInfo
 def get_ip_info(ip):
@@ -111,8 +107,12 @@ def process_list(ip_list):
         print(internal)
 
 if ip:
-    print(f"{'IP':<20}{'Country':<20}{'IP_Code':<10}{'VT_Code':<10}{'IPDB_Code':<10}{'ASN':<15}{'ASO':<30}{'VT_Rep':<10}{'VT_Score':<10}{'AIPDB_Score':<15}{'VT_Link'}")
-    print_ip_details(get_ip_info(ip), get_vt_info(ip), get_ipdb_info(ip, 90))
+    if ipaddress.ip_address(ip).is_private:
+        print(f"{ip} is a reserved IP address and not public, plesae provide another IP to lookup.")
+        exit()
+    else:
+        print(f"{'IP':<20}{'Country':<20}{'IP_Code':<10}{'VT_Code':<10}{'IPDB_Code':<10}{'ASN':<15}{'ASO':<30}{'VT_Rep':<10}{'VT_Score':<10}{'AIPDB_Score':<15}{'VT_Link'}")
+        print_ip_details(get_ip_info(ip), get_vt_info(ip), get_ipdb_info(ip, 90))
 elif ip_list:
     print(f"{'IP':<20}{'Country':<20}{'IP_Code':<10}{'VT_Code':<10}{'IPDB_Code':<10}{'ASN':<15}{'ASO':<30}{'VT_Rep':<10}{'VT_Score':<10}{'AIPDB_Score':<15}{'VT_Link'}")
     process_list(ip_list)
