@@ -108,7 +108,7 @@ def process_list(ip_list):
 
 if ip:
     if ipaddress.ip_address(ip).is_private:
-        print(f"{ip} is a reserved IP address and not public, plesae provide another IP to lookup.")
+        print(f"{ip} is am RFC1918 reserved IP address.")
         exit()
     else:
         print(f"{'IP':<20}{'Country':<20}{'IP_Code':<10}{'VT_Code':<10}{'IPDB_Code':<10}{'ASN':<15}{'ASO':<30}{'VT_Rep':<10}{'VT_Score':<10}{'AIPDB_Score':<15}{'VT_Link'}")
