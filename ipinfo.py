@@ -8,12 +8,13 @@ import os
 from dotenv import load_dotenv
 import ipaddress
 
-# Supress SSL warning when using verify=False to get arounod Zscaler certificate issues
+# Supress SSL warning when using verify=False to get around Zscaler certificate issues
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 parser = argparse.ArgumentParser(description="Obtain details about a give IP address or list of IP addresses")
 parser.add_argument("-i", "--ipaddress", type=str, help="The IP address you want to query excluding")
 parser.add_argument("-l", "--list", help="A file with a list of IP address, one per line")
+parser.add_argument("-lh", "--sha256list", help="A file with a list of SHA256 hashes, onoe oerline")
 parser.add_argument("-f", "--file", help="Optional: Output ASNs to a file, will be a text named after the ASN", action="store_true")
 args = parser.parse_args()
 
@@ -23,12 +24,13 @@ ip_api_key = os.getenv('IPINFO_API_KEY')
 vt_api_key = os.getenv('VIRUSTOTAL_API_KEY')
 ipdb_api_key = os.getenv('ABUSEIPDB_API_KEY')
 ipinfo_base_url = "https://api.ipinfo.io/lite/"
-vt_base_url = "https://www.virustotal.com/api/v3/ip_addresses/"
+vt_base_url = "https://www.virustotal.com/api/v3/"
 ipdb_base_url = "https://api.abuseipdb.com/api/v2/check"
 
 # Load args into variables
 ip = args.ipaddress
 ip_list = args.list
+hash_list = args.sha256list
 output_file = args.file
 
 # Get IP detail from IPInfo
@@ -42,7 +44,7 @@ def get_ip_info(ip):
 def get_vt_info(ip):
     headers = {'x-apikey': vt_api_key,
             'accept': 'application/json'}
-    query_url = f"{vt_base_url}{ip}"
+    query_url = f"{vt_base_url}ip_addresses/{ip}"
     res = requests.get(query_url, headers=headers, verify=False)
     data = res.json()
     return data
@@ -60,6 +62,40 @@ def get_ipdb_info(ip, days):
     data = res.json()
     return data
 
+# Get SHA256 hash details from VirusTotal:
+def get_sha256_vt(hash):
+    headers = {'x-apikey': vt_api_key,
+            'accept': 'application/json'}
+    query_url = f"{vt_base_url}files/{hash}"
+    res = requests.get(query_url, headers=headers, verify=False)
+    data = res.json()
+    if res.status_code == 200:
+        return data
+
+# extract data from sha256 json response
+def extract_sha256_response(json):
+    sha256 = json["data"]["id"]
+    print(sha256)
+    link = json["data"]["links"]["self"]
+    print(link)
+    ## attributes
+    tags = json["data"]["attributes"]["type_tags"]
+    threat_label = json["data"]["attributes"]["popular_threat_classification"]["suggested_threat_label"]
+
+# process a list of hashes           
+def process_hashes(list):
+    for hash in list:
+        if not get_sha256_vt(hash):
+                print(f"No result for sha256 {hash}:")
+                continue
+        json = get_sha256_vt(hash)
+        extract_sha256_response(json)
+
+def process_file(file_name, list_var):
+    with open(file_name, 'r', encoding='UTF-8') as file:
+        for line in file:
+            list_var.append(line.rstrip())
+
 # calculate the percentage of reports being suspiciouso or malicious
 def vt_score_calc(vt_data):
     malicious = vt_data["data"]["attributes"]["last_analysis_stats"]["malicious"]
@@ -72,7 +108,7 @@ def vt_score_calc(vt_data):
     score = "{:.2%}".format(sus / total)
     return score
 
-# Print IP infor to console:
+# Print IP info to console:
 def print_ip_details(ip_data, vt_data, ipdb_data):
     ip = ip_data["ip"]
     asn = ip_data["asn"]
@@ -106,6 +142,12 @@ def process_list(ip_list):
         print(f"\nThe following IP are not public and were ingnored:")
         print(internal)
 
+# hash samples
+hash = "0dc0f11ce993ac7302a8afd6390e6338d3263bc6cbdf778d94a8ee5fbbf63b38"
+bad_hash = "07b1d426ba3024b72a10fc7267675a6fb3a9a239565733f0f5166aadbb1594b1"
+hash_list = ["0dc0f11ce993ac7302a8afd6390e6338d3263bc6cbdf778d94a8ee5fbbf63b38", "07b1d426ba3024b72a10fc7267675a6fb3a9a239565733f0f5166aadbb1594b1"]
+
+
 if ip:
     if ipaddress.ip_address(ip).is_private:
         print(f"{ip} is am RFC1918 reserved IP address.")
@@ -116,5 +158,7 @@ if ip:
 elif ip_list:
     print(f"{'IP':<20}{'Country':<20}{'IP_Code':<10}{'VT_Code':<10}{'IPDB_Code':<10}{'ASN':<15}{'ASO':<30}{'VT_Rep':<10}{'VT_Score':<10}{'AIPDB_Score':<15}{'VT_Link'}")
     process_list(ip_list)
+#elif hash_list:
+    
 else:
     print(f"Please provide a valid argument, --help for help.")
