@@ -4,3 +4,5 @@ ripe.json
 list.txt
 test2.py
 tests/
+*.txt
+working/
